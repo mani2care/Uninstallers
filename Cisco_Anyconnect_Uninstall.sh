@@ -15,7 +15,19 @@ NVM_UNINST=${NVM_BINDIR}/nvm_uninstall.sh
 OPENDNS_UNINST=${ANYCONNECT_BINDIR}/umbrella_uninstall.sh
 Dart_UNINST=${ANYCONNECT_BINDIR}/dart_uninstall.sh
 
-echo "Cisco Anyconnect uninstaller starts..."
+# Uninstall Cisco AnyConnect Socket Filter app
+#if [[ -e "/Applications/Cisco/Cisco AnyConnect Socket Filter.app" ]]; then
+ #   echo "Uninstalling Cisco AnyConnect Socket Filter app..."
+ #   /bin/rm -rf "/Applications/Cisco/Cisco AnyConnect Socket Filter.app"
+  #  echo "Cisco AnyConnect Socket Filter app uninstalled successfully."
+#else
+ #   echo "Cisco AnyConnect Socket Filter app not found on this machine."
+#fi
+
+# Gracefully quit the AnyConnect App prior to running uninstall script(s)
+echo "Exiting ${ANYCONNECT_APPLICATIONNAME}"
+osascript -e "quit app \"${ANYCONNECT_APPLICATIONNAME}\"" > /dev/null 2>&1
+
 #Force Quit AnyConnect
 pkill -x "Cisco AnyConnect Secure Mobility Client"
 
@@ -77,6 +89,7 @@ if [ -x "${VPN_UNINST}" ]; then
     echo "Error uninstalling AnyConnect Secure Mobility Client."
   fi
 fi
-sudo rm -rf /Applications/Cisco*
-sudo rm -rf /opt/cisco*
+
+rm -rf /Applications/Cisco*
+rm -rf /opt/cisco*
 exit 0
