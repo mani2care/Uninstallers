@@ -1,7 +1,6 @@
-#!/bin/sh
-
+#!/bin/bash
 ## RipOff-McAfee.sh
-## version 2.0
+## version 2.3
 ## 
 ## Author: Adam Scheblein, McAfee IT
 ## E-Mail: adam_scheblein@mcafee.com
@@ -10,14 +9,77 @@
 ## 	Updated launchctl calls to use bootout instead of unload
 ##	Remove Privileged HelperTool added with ENS 10.7.1
 ##	Kill McAfee Agent Status Monitor when unloading launch items
+##
+## version 2.2 mods by Adam Scheblein
+##  Removes system extension 
+##  Kill McAfee Reporter when unloading launch items
+##
+## version 2.3 mods by Steve Dagley <@sdagley Jamf Nation/Twitter/MacAdmins Slack>
+##	If McAfee Network Extension is loaded remove it without prompting for user approval
+##		on macOS Catalina, Big Sur, or Monterey. Uses method documented by @rtrouten's post:
+##		https://derflounder.wordpress.com/2021/10/26/silently-uninstalling-system-extensions-on-macos-monterey-and-earlier/
+
+# Temp plist files used for import and export from authorization database.
+management_db_original_setting="$(mktemp).plist"
+management_db_edited_setting="$(mktemp).plist"
+management_db_check_setting="$(mktemp).plist"
+
+# Expected settings from management database for com.apple.system-extensions.admin
+original_setting="authenticate-admin-nonshared"
+updated_setting="allow"
+
+ManagementDatabaseUpdatePreparation() {
+# Create temp plist files
+touch "$management_db_original_setting"
+touch "$management_db_edited_setting"
+touch "$management_db_check_setting"
+
+# Create backup of the original com.apple.system-extensions.admin settings from the management database
+/usr/bin/security authorizationdb read com.apple.system-extensions.admin > "$management_db_original_setting"
+
+# Create copy of the original com.apple.system-extensions.admin settings from the management database for editing.
+/usr/bin/security authorizationdb read com.apple.system-extensions.admin > "$management_db_edited_setting"
+}
+
+UpdateManagementDatabase() {
+if [[ -r "$management_db_edited_setting" ]] && [[ $(/usr/libexec/PlistBuddy -c "Print rule:0" "$management_db_edited_setting") = "$original_setting" ]]; then
+   /usr/libexec/PlistBuddy -c "Set rule:0 $updated_setting" "$management_db_edited_setting"
+   if [[ $(/usr/libexec/PlistBuddy -c "Print rule:0" "$management_db_edited_setting" ) = "$updated_setting" ]]; then
+      echo "Edited $management_db_edited_setting is set to allow system extensions to be uninstalled without password prompt."
+      echo "Now importing setting into authorization database."
+      /usr/bin/security authorizationdb write com.apple.system-extensions.admin < "$management_db_edited_setting"
+      if [[ $? -eq 0 ]]; then
+         echo "Updated setting successfully imported."
+         UpdatedAuthorizationSettingInstalled="true"
+      fi
+    else
+      echo "Failed to update $management_db_edited_setting file with the correct setting to allow system extension uninstallation without prompting for admin credentials."
+    fi
+fi
+}
+
+RestoreManagementDatabase() {
+/usr/bin/security authorizationdb read com.apple.system-extensions.admin > "$management_db_check_setting"
+if [[ ! $(/usr/libexec/PlistBuddy -c "Print rule:0" "$management_db_check_setting") = "$original_setting" ]]; then
+   if [[ -r "$management_db_original_setting" ]] && [[ $(/usr/libexec/PlistBuddy -c "Print rule:0" "$management_db_original_setting") = "$original_setting" ]]; then
+      echo "Restoring original settings to allow system extension uninstallation only after prompting for admin credentials."
+      echo "Now importing setting into authorization database."
+      /usr/bin/security authorizationdb write com.apple.system-extensions.admin < "$management_db_original_setting"
+            if [[ $? -eq 0 ]]; then
+         echo "Original setting successfully imported."
+         OriginalAuthorizationSettingInstalled=1
+      fi
+
+    else
+      echo "Failed to update the authorization database with the correct setting to allow system extension uninstallation only after prompting for admin credentials."
+    fi
+fi
+}
 
 # This script has been verified to work on McAfee Endpoint Security 10 for Mac.
-# It supports uninstalls through ENSM 10.6.x, and removes all McProducts.
-
+# It supports uninstalls through ENSM 10.7.5, and removes all McProducts.
 #get current user name and ID
 userName=$(/bin/echo 'show State:/Users/ConsoleUser' | /usr/sbin/scutil | /usr/bin/awk '/Name / { print $3 }')
-currentUserID=$(/usr/bin/id -u "$userName")
-
 
 # stop running processes
 echo "stopping running processes"
@@ -53,6 +115,37 @@ echo "unloading kexts"
 /sbin/kextunload /usr/local/McAfee/fmp/Extensions/FMPSysCore.kext
 echo ""
 
+echo "uninstalling system extensions"
+if [ -e /Applications/McAfeeSystemExtensions.app ] ; then
+	McAfeeNetworkExtensionLoaded=$(/usr/bin/systemextensionsctl list | /usr/bin/grep "McAfee Network Extension")
+	
+	if [[ -n "$McAfeeNetworkExtensionLoaded" ]]; then
+
+		# Prepare to update authorization database to allow system extensions to be uninstalled without password prompt.
+		ManagementDatabaseUpdatePreparation
+	
+		# Update authorization database with new settings.
+		UpdateManagementDatabase
+		
+		# Uninstall the System Extension
+		/usr/bin/sudo -u $userName /usr/local/McAfee/fmp/AAC/bin/deactivatesystemextension com.mcafee.CMF.networkextension
+		
+		# Once the system extensions are uninstalled, the relevant settings for the authorization database will be restored from backup to their prior state.
+		if [[ -n "$UpdatedAuthorizationSettingInstalled" ]]; then 
+			RestoreManagementDatabase
+	
+			if [[ -n "$OriginalAuthorizationSettingInstalled" ]]; then
+				echo "com.apple.system-extensions.admin settings in the authorization database successfully restored to $original_setting."
+				rm -rf "$management_db_original_setting"
+				rm -rf "$management_db_edited_setting"
+				rm -rf "$management_db_check_setting"
+			fi
+	
+		fi
+	fi
+fi
+echo ""
+
 # unload launch items
 echo "unloading launch items"
 /bin/launchctl bootout system /Library/LaunchAgents/com.mcafee.McAfeeSafariHost.plist
@@ -71,9 +164,8 @@ echo "unloading launch items"
 /bin/launchctl bootout system /Library/LaunchDaemons/com.mcafee.agentMonitor.helper.plist
 /usr/bin/killall -c Menulet
 /usr/bin/killall -c "McAfee Agent Status Monitor"
+/usr/bin/killall -c McAfee\ Reporter
 echo ""
-
-# TODO: Unload safari/finder/chrome extensions
 
 # rm program dirs
 echo "removing program dirs"
@@ -82,6 +174,7 @@ echo "removing program dirs"
 /bin/rm -rf /Applications/DataLossPrevention.app/
 /bin/rm -rf /Applications/McAfee\ Endpoint\ Security\ for\ Mac.app/
 /bin/rm -rf /Applications/McAfee\ Endpoint\ Protection\ for\ Mac.app/
+/bin/rm -rf /Applications/McAfeeSystemExtensions.app/
 /bin/rm -rf /Applications/Utilities/McAfee\ ePO\ Remote\ Provisioning\ Tool.app/
 echo ""
 
@@ -121,10 +214,11 @@ echo ""
 # rm logs
 echo "removing logs"
 /bin/rm -f /Library/Logs/Native\ Encryption.log
+/bin/rm -f /Library/Logs/FRP.log
 /bin/rm -f /private/var/log/McAfeeSecurity.log*
+/bin/rm -f /private/var/log/mcupdater*
+/bin/rm -f /private/var/log/MFEdx*
 echo ""
-
-# TODO: loop through and get all hotfix receipts to remove
 
 # forget receipts
 echo "forgetting receipts"
