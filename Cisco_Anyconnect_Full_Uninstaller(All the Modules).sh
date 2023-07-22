@@ -28,68 +28,79 @@ Dart_UNINST=${ANYCONNECT_BINDIR}/dart_uninstall.sh
 echo "Exiting ${ANYCONNECT_APPLICATIONNAME}"
 osascript -e "quit app \"${ANYCONNECT_APPLICATIONNAME}\"" > /dev/null 2>&1
 
-#Force Quit AnyConnect
+# Force Quit AnyConnect
 pkill -x "Cisco AnyConnect Secure Mobility Client"
 
 # Gracefully quit the AnyConnect App prior to running uninstall script(s)
 echo "Exiting ${ANYCONNECT_APPLICATIONNAME}"
 osascript -e "quit app \"${ANYCONNECT_APPLICATIONNAME}\"" > /dev/null 2>&1
 
+# Uninstall AnyConnect Dart Module
 if [ -x "${Dart_UNINST}" ]; then
-  ${Dart_UNINST}
+  sudo "${Dart_UNINST}"
   if [ $? -ne 0 ]; then
     echo "Error uninstalling AnyConnect Dart Module."
   fi
 fi
+
+# Uninstall AnyConnect ISE Posture Module
 if [ -x "${ISEPOSTURE_UNINST}" ]; then
-  ${ISEPOSTURE_UNINST}
+  sudo "${ISEPOSTURE_UNINST}"
   if [ $? -ne 0 ]; then
     echo "Error uninstalling AnyConnect ISE Posture Module."
   fi
 fi
 
+# Uninstall AnyConnect ISE Compliance Module
 if [ -x "${ISECOMPLIANCE_UNINST}" ]; then
-  ${ISECOMPLIANCE_UNINST}
+  sudo "${ISECOMPLIANCE_UNINST}"
   if [ $? -ne 0 ]; then
     echo "Error uninstalling AnyConnect ISE Compliance Module."
   fi
 fi
 
+# Uninstall AnyConnect Posture Module
 if [ -x "${POSTURE_UNINST}" ]; then
-  ${POSTURE_UNINST}
+  sudo "${POSTURE_UNINST}"
   if [ $? -ne 0 ]; then
     echo "Error uninstalling AnyConnect Posture Module."
   fi
 fi
 
+# Uninstall AnyConnect Roaming Security Module
 if [ -x "${OPENDNS_UNINST}" ]; then
-  ${OPENDNS_UNINST}
+  sudo "${OPENDNS_UNINST}"
   if [ $? -ne 0 ]; then
     echo "Error uninstalling AnyConnect Roaming Security Module."
   fi
 fi
 
+# Uninstall AMP Enabler Module
 if [ -x "${FIREAMP_UNINST}" ]; then
-  ${FIREAMP_UNINST}
+  sudo "${FIREAMP_UNINST}"
   if [ $? -ne 0 ]; then
-  echo "Error uninstalling AMP Enabler Module."
+    echo "Error uninstalling AMP Enabler Module."
   fi
 fi
 
+# Uninstall Network Visibility Module
 if [ -x "${NVM_UNINST}" ]; then
-  ${NVM_UNINST}
+  sudo "${NVM_UNINST}"
   if [ $? -ne 0 ]; then
-  echo "Error uninstalling Network Visibility Module."
+    echo "Error uninstalling Network Visibility Module."
   fi
 fi
 
+# Uninstall AnyConnect Secure Mobility Client
 if [ -x "${VPN_UNINST}" ]; then
-  ${VPN_UNINST}
+  sudo "${VPN_UNINST}"
   if [ $? -ne 0 ]; then
     echo "Error uninstalling AnyConnect Secure Mobility Client."
   fi
 fi
 
-rm -rf /Applications/Cisco*
-rm -rf /opt/cisco*
+# Remove remaining AnyConnect files
+sudo rm -rf /Applications/Cisco*
+sudo rm -rf /opt/cisco*
+
 exit 0
