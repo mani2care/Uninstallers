@@ -36,6 +36,7 @@ else
 /bin/launchctl asuser "${console_user_uid}" /bin/launchctl unload -w /Library/LaunchAgents/com.github.macadmins.Nudge.plist  > /dev/null 2>&1
 # Kill Nudge just in case (say someone manually opens it and not launched via launchagent
 /usr/bin/killall Nudge  > /dev/null 2>&1
+/usr/bin/pgrep -i Nudge | /usr/bin/xargs kill
 fi
 
 # Unload the Nudge Logger launchdaemon (if its running)
