@@ -8,10 +8,10 @@ uninstall_app() {
     local app_name="$1"
     
     # Stop the application if it's running
-    echo "Checking for application status $app_name"
+    echo "Checking for application status Snagit $app_name"
 
     # Get the process IDs of the application
-    app_pids=($(pgrep -f "$app_name"))
+    app_pids=($(pgrep -f "Snagit $app_name"))
 
     # Check if there are any running processes
     #if [[ -${#app_pids[@]} -gt 0 && ${#app_pids[@]} -ne "" ]]; then
@@ -23,14 +23,14 @@ uninstall_app() {
             echo "The application has been forcefully terminated =$pid"
         done
     else 
-    echo "Application Process not found $app_name"
+    echo "Application Process not found Snagit $app_name"
     fi
     sleep 5
-    echo "Removing the $app_name LicenseKey file..."
+    echo "Removing the Snagit $app_name LicenseKey file..."
     rm -f "$LicenseKeyFile"
 
     # Remove the application and its associated files
-    rm -rf /Applications/$app_name
+    rm -rf /Applications/Snagit\ $app_name*
     rm -rf /Users/Shared/TechSmith
     rm -rf ~/Library/Group\ Containers/*.com.techsmith.snagit
     rm -rf ~/Library/Caches/com.techsmith.snagit*
@@ -52,7 +52,7 @@ uninstall_app() {
 }
 
 # List of applications to uninstall
-applications=("Snagit 2023" "Snagit 2022" "Snagit 2021")
+applications=("2023" "2022" "2021")
 
 # Loop through the list and uninstall each application
 for app in "${applications[@]}"; do
