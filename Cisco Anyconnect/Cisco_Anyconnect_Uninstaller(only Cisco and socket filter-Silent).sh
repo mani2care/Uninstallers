@@ -1,4 +1,5 @@
 #!/bin/bash
+#Silent uninstaller 
 
 LEGACY_INSTPREFIX=/opt/cisco/vpn
 LEGACY_UNINST="/opt/cisco/vpn/bin/vpn_uninstall.sh"
