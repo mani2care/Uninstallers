@@ -1,4 +1,5 @@
 #!/bin/sh
+# User will get the authandication popup.
 
 ANYCONNECT_APPLICATIONNAME="Cisco AnyConnect Secure Mobility Client"
 INSTPREFIX="/opt/cisco/anyconnect"
