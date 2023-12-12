@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Function to uninstall Snagit 2023
-uninstall_snagit_2023() {
+# Function to uninstall Snagit
+
+uninstall_snagit() {
     local app_name="$1"
     
     # Stop the application if it's running
@@ -29,45 +30,36 @@ uninstall_snagit_2023() {
     # Remove the application and its associated files
     rm -rf /Applications/Snagit\ $app_name*
     rm -rf /Users/Shared/TechSmith
+    rm -rf /Users/Shared/ABB.snagtheme
+    rm -rf ~/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/Snagit\ 2024/Themes/ABB.snagtheme
     rm -rf ~/Library/Group\ Containers/*.com.techsmith.snagit
     rm -rf ~/Library/Caches/com.techsmith.snagit*
     rm -rf ~/Library/Caches/com.TechSmith.Snagit*
     rm -rf ~/Library/Logs/TechSmith
     rm -rf ~/Library/Preferences/com.TechSmith.Snagit*
     rm -rf ~/Library/Preferences/com.techsmith.snagit.capturehelper*
+    rm -rf ~/Library/Preferences/com.TechSmith.SupportSnagit*
     rm -rf ~/Library/Saved\ Application\ State/com.TechSmith.Snagit*
     rm -rf ~/Library/WebKit/com.TechSmith.Snagit*
     rm -rf ~/Library/HTTPStorages/com.TechSmith.Snagit*
     rm -rf ~/Library/Application\ Support/TechSmith
-    rm -rf ~/Library/Application\ Support/CrashReporter/Snagit* 
-
-    #Exception
-    #rm -rf ~/Pictures/Snagit  
+    rm -rf ~/Library/Application\ Support/CrashReporter/Snagit*  
 }
 
-# Function to uninstall Snagit 2022
-#uninstall_snagit_2022() {
-  #  local app_name="Snagit 2022"
-    # Add the uninstallation logic for Snagit 2022 here
-#}
-
-# Function to uninstall Snagit 2021
-#uninstall_snagit_2021() {
- #   local app_name="Snagit 2021"
-    # Add the uninstallation logic for Snagit 2021 here
-#}
-
 # Check for the presence of Snagit 2023 and uninstall it
-if [ -e "/Applications/Snagit 2023.app" ]; then
-    uninstall_snagit_2023 "2023"
+if [ -e "/Applications/Snagit 2024.app" ]; then
+    uninstall_snagit "2024"
+    exit 0
+elif [ -e "/Applications/Snagit 2023.app" ]; then
+    uninstall_snagit "2023"
     exit 0
 elif [ -e "/Applications/Snagit 2022.app" ]; then
-    uninstall_snagit_2023 "2022"
+    uninstall_snagit "2022"
     exit 0
 elif [ -e "/Applications/Snagit 2021.app" ]; then
-    uninstall_snagit_2023 "2021"
+    uninstall_snagit "2021"
     exit 0
 else
     echo "None of the Snagit versions are installed on your Mac."
-    exit 1
+    exit 0
 fi
