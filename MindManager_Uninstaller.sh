@@ -11,13 +11,12 @@ USERNAME=$( scutil <<< "show State:/Users/ConsoleUser" | awk '/Name :/ && ! /log
 # Uninstall MindManager
 echo "Uninstalling MindManager files..."
 sudo rm -rf "/Applications/MindManager.app"
-sudo rm -rf "/Users/$USERNAME/Library/Preferences/com.mindjet.mindmanager*"
-sudo rm -rf "/Users/$USERNAME/Library/Application Support/MindManager"
-sudo rm -rf "/Users/$USERNAME/Library/Application Support/Mindjet"
-sudo rm -rf "/Users/$USERNAME/Library/WebKit/com.mindjet.mindmanager.23"
-sudo rm -rf "/Users/$USERNAME/Library/HTTPStorages/com.mindjet.mindmanager.23"
-sudo rm -rf "/Users/$USERNAME/Library/HTTPStorages/com.mindjet.mindmanager.23.binarycookies"
-sudo rm -rf "/Users/$USERNAME/Library/Preferences/ByHost/com.mindjet.mindmanager.23*"
+sudo rm -rf /Users/$USERNAME/Library/Preferences/com.mindjet.mindmanager*
+sudo rm -rf /Users/$USERNAME/Library/Application\ Support/MindManager
+sudo rm -rf /Users/$USERNAME/Library/Application\ Support/Mindjet
+sudo rm -rf /Users/$USERNAME/Library/WebKit/com.mindjet.mindmanager*
+sudo rm -rf /Users/$USERNAME/Library/HTTPStorages/com.mindjet.mindmanager*
+sudo rm -rf /Users/$USERNAME/Library/Preferences/ByHost/com.mindjet.mindmanager*
 echo "MindManager has been successfully uninstalled."
 
 exit 0
