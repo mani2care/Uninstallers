@@ -17,6 +17,7 @@ sudo rm -rf "/Users/$USERNAME/Library/Application Support/Mindjet"
 sudo rm -rf "/Users/$USERNAME/Library/WebKit/com.mindjet.mindmanager.23"
 sudo rm -rf "/Users/$USERNAME/Library/HTTPStorages/com.mindjet.mindmanager.23"
 sudo rm -rf "/Users/$USERNAME/Library/HTTPStorages/com.mindjet.mindmanager.23.binarycookies"
+sudo rm -rf "/Users/$USERNAME/Library/Preferences/ByHost/com.mindjet.mindmanager.23*"
 echo "MindManager has been successfully uninstalled."
 
 exit 0
