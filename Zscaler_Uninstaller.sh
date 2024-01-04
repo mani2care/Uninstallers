@@ -1,8 +1,7 @@
 #!/bin/sh
 #sudo sh /Applications/Zscaler/.Uninstaller.sh abbpilot
 function removeZscaler () {
-PWord=`echo 'abbpilot' | base64 --decode`
-/bin/sh /Applications/Zscaler/.Uninstaller.sh $PWord
+/bin/sh /Applications/Zscaler/.Uninstaller.sh pilot #yourpassword gos here
 echo "Successfully uninstalled"
 }
 
