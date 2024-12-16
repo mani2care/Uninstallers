@@ -37,8 +37,10 @@ if [[ -e /Library/LaunchAgents/com.abb.enterprise-connect.plist ]]; then
 
   # Quit the Enterprise Connect menu extra and app
   echo "Stopping Enterprise Connect processes..."
-  killall "Enterprise Connect Menu" &>/dev/null
-  killall "Enterprise Connect" &>/dev/null
+ # killall "Enterprise Connect Menu" &>/dev/null
+ # killall "Enterprise Connect" &>/dev/null
+  ps aux | grep "[E]nterprise Connect" | awk '{print $2}' | xargs kill -9
+  ps aux | grep "[E]nterprise Connect Menu" | awk '{print $2}' | xargs kill -9
 fi
 
 # Finally, remove the Enterprise Connect app bundle
