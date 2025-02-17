@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # uninstalls Microsoft Teams
-
+echo "Starting Microsoft Teams uninstallation..."
+echo "Stopping Microsoft Teams processes..."
 # kill all running processes
 PROCESSES=$(/bin/ps ax | /usr/bin/grep "[/]Applications/Microsoft Teams" | /usr/bin/awk '{ print $1 }')
 for PROCESS_ID in ${PROCESSES}; do
@@ -24,12 +25,13 @@ for USERNAME in $LOCAL_USERS; do
 	USER_HOME=$(/usr/bin/dscl . -read /Users/$USERNAME NFSHomeDirectory 2>/dev/null | /usr/bin/sed 's/^[^\/]*//g')
 
 	if [[ -d "$USER_HOME" && "$USER_HOME" != "/var/empty" ]]; then
-		
+	echo "Cleaning up Teams data for user: $USERNAME"
 		# Removing Teams files and directories
 		
-		/usr/bin/sudo -u $USERNAME /usr/bin/defaults delete com.microsoft.teams
-		/usr/bin/sudo -u $USERNAME /usr/bin/defaults delete com.microsoft.teams2
-		
+        /usr/bin/defaults delete $USER_HOME/Library/Preferences/com.microsoft.teams 2>/dev/null
+        /usr/bin/defaults delete $USER_HOME/Library/Preferences/com.microsoft.teams2 2>/dev/null
+
+# Remove all Teams-related directories and caches
 		/bin/rm -rf "$USER_HOME/Library/Application Support/Microsoft/Teams" \
 					"$USER_HOME/Library/Application Support/Electron Helper" \
 					"$USER_HOME/Library/Application Support/com.microsoft.teams" \
@@ -47,10 +49,11 @@ for USERNAME in $LOCAL_USERS; do
 	fi
 done
 			
-# forget the packages
+# Forget Teams packages
+echo "Unregistering Teams packages..."
 PKGS=$(/usr/sbin/pkgutil --pkgs | /usr/bin/grep "com.microsoft.teams")
 for PKG in ${PKGS}; do
 	/usr/sbin/pkgutil --forget "$PKG" >/dev/null 2>&1
 done
-
+echo "Microsoft Teams uninstallation completed successfully."
 exit 0
