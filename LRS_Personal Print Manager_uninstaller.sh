@@ -1,4 +1,7 @@
 #!/bin/sh
+# **********************************************************************
+# * Created Manikandan (mani2care) 08-Mar-2025
+
 # shellcheck disable=SC2039
 if [ "$(id -u)" -ne 0 ]; then
     echo "This script must be run as root"
